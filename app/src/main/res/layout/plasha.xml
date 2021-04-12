@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="15dp"
+    android:background="@drawable/for_plasha"
+    >
+
+
+    <ImageView
+        android:id="@+id/iv_plasha"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:layout_margin="20dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/tv_title"
+        android:layout_width="250dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_marginStart="22dp"
+        android:layout_marginLeft="22dp"
+        android:layout_marginTop="13dp"
+        android:layout_marginEnd="31dp"
+        android:layout_marginRight="31dp"
+
+        android:layout_toEndOf="@+id/iv_plasha"
+        android:layout_toRightOf="@+id/iv_plasha"
+        android:text="dasfdgfg"
+        android:textColor="@color/colorText"
+        android:textSize="20sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/tv_content"
+        android:layout_width="217dp"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/tv_title"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_marginTop="14dp"
+        android:layout_marginEnd="29dp"
+        android:layout_marginRight="29dp"
+        android:layout_marginBottom="20dp"
+        android:text="TextView fdgfdg dfgdfggdf
+dfgdfgfdgdfgdf
+gdfggg
+fdg
+dfgdfgdfg
+df
+gdfg
+df
+gdf
+gfd
+gdf
+gdf
+gdf
+ggfdg
+dfg
+dg
+fdf
+g
+dg
+
+dfg
+g"
+        android:textColor="@color/colorText"
+        android:textSize="18sp"
+        android:textStyle="italic" />
+
+
+</RelativeLayout>

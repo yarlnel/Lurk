@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/for_quote"
+    android:layout_margin="20dp"
+    >
+
+    <TextView
+        android:layout_marginTop="25dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/tv_content"
+        android:textSize="20sp"
+        android:textStyle="italic"
+        android:textColor="@color/colorText"
+        android:layout_marginRight="20dp"
+        android:layout_marginLeft="20dp"
+        android:text="fdsdfdsdfgfdg
+fdgfd
+gfdg
+fd
+gdf
+gfd
+g
+dfg
+df
+gfd
+gfd
+g
+dfg
+fdg
+dfg"
+
+        android:padding="20sp"
+        android:background="@drawable/for_text"
+
+        />
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/tv_author"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:textColor="@color/colorText"
+        android:layout_margin="20dp"
+        android:text="fdsdfds"
+        android:paddingRight="20dp"
+        android:layout_below="@+id/tv_content"
+        android:gravity="right"
+        />
+
+</RelativeLayout>
