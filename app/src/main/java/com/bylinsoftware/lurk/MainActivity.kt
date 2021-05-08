@@ -66,11 +66,12 @@ class MainActivity : AppCompatActivity(), HasLogSystem
         val historyDao = db.historyDao()
 
         // get url (uri) for article (from pref or intent_extras or def_value)
-        uri = intent.getStringExtra("uri") ?: historyDao.getLastPage().href ?:  "$url/КНДР"
+        uri = intent.getStringExtra("uri") ?: historyDao.getLastPage().href ?: "$url/КНДР"
 
 
 
         // Log saved articles
+        /*
         db.articleDao().getArticles().forEach { e ->
             withLogName("article_db") {
                 log("Title: "+e.title)
@@ -78,6 +79,8 @@ class MainActivity : AppCompatActivity(), HasLogSystem
                 log("Toc: \n"+e.tocInfoJson)
             }
         }
+         */
+
 
         if (intent.dataString != null) uri = intent.dataString ?: "$url/КНДР"
 
@@ -271,10 +274,9 @@ class MainActivity : AppCompatActivity(), HasLogSystem
     {
         val view = layoutInflater.inflate(R.layout.text_p, ll, false)
         val tv = view.findViewById<TextView>(R.id.tv_p)
-        tv.text = makeSpannable(
-            text = paragraph.content,
-            listOfHrefs = paragraph.listOfHrefs
-        ) { _, ref -> goToRef(ref) }
+
+        tv.text = makeReference(paragraph.content, paragraph.listOfHrefs)
+
         tv.movementMethod = LinkMovementMethod.getInstance()
         ll.addView(view)
     }
@@ -285,15 +287,9 @@ class MainActivity : AppCompatActivity(), HasLogSystem
         val tvAuthor = view.findViewById<TextView>(R.id.tv_author)
         val tvContent = view.findViewById<TextView>(R.id.tv_content)
 
-        tvAuthor.text = makeSpannable(
-            text = quoteTiny.author,
-            listOfHrefs = quoteTiny.authorHrefs
-        ) { _, ref -> goToRef(ref) }
+        tvAuthor.text = makeReference(quoteTiny.author, quoteTiny.authorHrefs)
 
-        tvContent.text = makeSpannable(
-            text = quoteTiny.content,
-            listOfHrefs = quoteTiny.listOfHrefs
-        ) { _, ref -> goToRef(ref) }
+        tvContent.text = makeReference(quoteTiny.content, quoteTiny.listOfHrefs)
 
         tvContent.movementMethod = LinkMovementMethod.getInstance()
         ll.addView(view)
@@ -305,16 +301,10 @@ class MainActivity : AppCompatActivity(), HasLogSystem
         val tvAuthor = view.findViewById<TextView>(R.id.tv_author)
         val tvContent = view.findViewById<TextView>(R.id.tv_content)
 
-        tvAuthor.text = makeSpannable(
-            text = quote.author,
-            listOfHrefs = quote.authorHrefs
-        ) { _, ref ->
-            goToRef(ref)
-        }
-        tvContent.text = makeSpannable(
-            text = quote.content,
-            listOfHrefs = quote.listOfHrefs
-        ) { _, ref -> goToRef(ref) }
+        tvAuthor.text = makeReference(quote.author, quote.authorHrefs)
+
+        tvContent.text = makeReference(quote.content, quote.listOfHrefs)
+
         tvContent.movementMethod = LinkMovementMethod.getInstance()
         ll.addView(view)
     }
@@ -325,10 +315,9 @@ class MainActivity : AppCompatActivity(), HasLogSystem
         val tvContent = view.findViewById<TextView>(R.id.tv_content)
         val tvTitle = view.findViewById<TextView>(R.id.tv_title)
         val ivPlashka = view.findViewById<ImageView>(R.id.iv_plasha)
-        tvContent.text = makeSpannable(
-            text = plashka.content,
-            listOfHrefs = plashka.listOfHrefs
-        ) { _, ref -> goToRef(ref) }
+
+        tvContent.text = makeReference(plashka.content, plashka.listOfHrefs)
+
         Picasso
             .with(this)
             .apply { isLoggingEnabled = true }
@@ -390,10 +379,7 @@ class MainActivity : AppCompatActivity(), HasLogSystem
         makeImgResolutionBetter()
 
 
-        tvDesc.text = makeSpannable(
-            text = img.content,
-            listOfHrefs = img.listOfHrefs
-        ) { _, ref -> goToRef(ref) ; Toast.makeText(this, "Ref is: $ref", Toast.LENGTH_SHORT).show() }
+        tvDesc.text = makeReference(img.content, img.listOfHrefs)
         tvDesc.movementMethod = LinkMovementMethod.getInstance()
         ll.addView(view)
     }
@@ -405,10 +391,7 @@ class MainActivity : AppCompatActivity(), HasLogSystem
         val num = view.findViewById<TextView>(R.id.tv_num)
         counter++
         num.text = "$counter. "
-        tv.text = makeSpannable(
-            text = listElement.content,
-            listOfHrefs = listElement.listOfHrefs
-        ) { _, ref -> goToRef(ref) }
+        tv.text = makeReference(listElement.content, listElement.listOfHrefs)
         tv.movementMethod = LinkMovementMethod.getInstance()
         ll.addView(view)
     }
@@ -417,10 +400,9 @@ class MainActivity : AppCompatActivity(), HasLogSystem
     {
         val view = layoutInflater.inflate(R.layout.no_name_quote, ll, false)
         val tvContent = view.findViewById<TextView>(R.id.tv_content)
-        tvContent.text = makeSpannable(
-            text = quoteNoName.content,
-            listOfHrefs = quoteNoName.listOfHrefs
-        ) { _, ref -> goToRef(ref) }
+
+        tvContent.text = makeReference(quoteNoName.content, quoteNoName.listOfHrefs)
+
         tvContent.movementMethod = LinkMovementMethod.getInstance()
         ll.addView(view)
     }
@@ -447,10 +429,7 @@ class MainActivity : AppCompatActivity(), HasLogSystem
         }
 
         // make our string clickable and with another color use Spannable Elements in text
-        tvDesc.text = makeSpannable(
-            text = videoBox.content,
-            listOfHrefs = videoBox.listOfHrefs
-        ) { _, ref -> goToRef(ref) }
+        tvDesc.text = makeReference(videoBox.content, videoBox.listOfHrefs)
         tvDesc.movementMethod = LinkMovementMethod.getInstance()
         ll.addView(view)
     }

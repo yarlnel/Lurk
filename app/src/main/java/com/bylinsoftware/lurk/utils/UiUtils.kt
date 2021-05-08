@@ -91,3 +91,8 @@ fun makeSpannable(text: String, listOfHrefs: List<Pair<String, String>>, lambda:
     return spannable
 }
 
+fun Activity.makeReference(text: String, listOfHrefs: List<Pair<String, String>>) : SpannableString
+    = makeSpannable(text = text, listOfHrefs = listOfHrefs) { _, ref ->
+        this.goToRef(ref)
+    }
+
