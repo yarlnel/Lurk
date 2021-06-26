@@ -1,6 +1,6 @@
 package com.bylinsoftware.lurk.dataSource
 
-import android.util.Log
+
 import com.bylinsoftware.lurk.gson.getGsonBuilder
 import com.bylinsoftware.lurk.models.*
 import com.bylinsoftware.lurk.utils.clearAllSymbols
@@ -13,7 +13,7 @@ import org.jsoup.Jsoup
 import java.io.IOException
 
 const val url = "https://lurkmore.to"
-private const val TAG = "tag"
+
 /**
 
  */
@@ -38,7 +38,7 @@ fun highResolutionImageSource(url: String): Single<String> = Single.create<Strin
     }
 }
 
-fun stylesheetSource (path: String) : Single<List<Pair<String, String>>> = Single.create{ w ->
+fun stylesheetSource (path: String) : Single<List<Pair<String, String>>> = Single.create{ singleEmitter ->
     val doc = Jsoup.connect(path)
         .userAgent("Chrome/4.0.249.0 Safari/532.5")
         .get()
@@ -61,7 +61,7 @@ fun stylesheetSource (path: String) : Single<List<Pair<String, String>>> = Singl
             }
         }
     }
-    w.onSuccess(styleList)
+    singleEmitter.onSuccess(styleList)
 }
 
 /*
@@ -72,7 +72,7 @@ when {
                             "green" in word[3] -> styleList.add(word[1].replace(".", "") to "#8bc34a")
                         }
  */
-fun contentSource(path: String, android: Boolean) : Observable<ArticleElement> = Observable.create { w ->
+fun contentSource(path: String, android: Boolean) : Observable<ArticleElement> = Observable.create { emitter ->
     try {
         val doc = Jsoup.connect(path)
             .userAgent("Chrome/4.0.249.0 Safari/532.5")
@@ -81,19 +81,19 @@ fun contentSource(path: String, android: Boolean) : Observable<ArticleElement> =
         //val elements = doc.body().select("#mw-content-text")[0].allElements
 
         // #mw-content-text
-        doc.body().select("#mw-content-text")[0].children().forEach { it ->
+        doc.body().select("#mw-content-text")[0].children().forEach { htmlElement ->
 
 
             when {
 
-                it.tagName() == "table" && it.className() == "lm-plashka" -> {
-                    val td = it.select("tbody > tr > td")
+                htmlElement.tagName() == "table" && htmlElement.className() == "lm-plashka" -> {
+                    val td = htmlElement.select("tbody > tr > td")
                     val imgUrl = url + td[0].select("a > img").attr("src")
                     val title = td[1].select("b").text()
                     val content = td[1].text()
                     val listOfHrefs = td[1].select("a")
                         .map { element -> element.text() to element.attr("href").makeReference() }
-                    w.onNext(
+                    emitter.onNext(
                         Plashka(
                             imgUrl = imgUrl,
                             title = title,
@@ -103,37 +103,37 @@ fun contentSource(path: String, android: Boolean) : Observable<ArticleElement> =
                     )
                 }
 
-                it.tagName() == "ul" -> {
-                    it.children().forEach { e ->
+                htmlElement.tagName() == "ul" -> {
+                    htmlElement.children().forEach { e ->
                         if ("toclevel-1" !in e.className() && "toclevel-2" !in e.className() && "toclevel-3" !in e.className())
-                            w.onNext(Li(content = e.text(), listOfHrefs = e.select("a").map { element ->
+                            emitter.onNext(Li(content = e.text(), listOfHrefs = e.select("a").map { element ->
                                 element.text() to element.attr("href").makeReference()
                             }))
                     }
                 }
-                it.tagName() == "p" -> {
-                    val listOfHrefs = it.select("a")
+                htmlElement.tagName() == "p" -> {
+                    val listOfHrefs = htmlElement.select("a")
                         .map { e -> e.text() to e.attr("href").makeReference() }
-                    if (it.text().isNotEmpty()) w.onNext(
+                    if (htmlElement.text().isNotEmpty()) emitter.onNext(
                         P(
                             listOfHrefs = listOfHrefs,
-                            content = it.text()
+                            content = htmlElement.text()
                         )
                     )
                 }
-                it.tagName() == "table" && it.className() == "tpl-quote-tiny" -> {
-                    it.select("tbody > tr > td")[1]?.let { td ->
-                        if (it.select("tbody > tr").size > 1) w.onNext(
+                htmlElement.tagName() == "table" && htmlElement.className() == "tpl-quote-tiny" -> {
+                    htmlElement.select("tbody > tr > td")[1]?.let { td ->
+                        if (htmlElement.select("tbody > tr").size > 1) emitter.onNext(
                             QuoteTiny(
                                 listOfHrefs = td.select("p > a").map { e ->
                                     e.text() to e.attr("href").makeReference()
                                 },
                                 content = td.text(),
-                                authorHrefs = it.select("tbody > tr")[1].select("td > a")
+                                authorHrefs = htmlElement.select("tbody > tr")[1].select("td > a")
                                     .map { e -> e.text() to e.attr("href").makeReference() },
-                                author = it.select("tbody > tr")[1].select("td").text()
+                                author = htmlElement.select("tbody > tr")[1].select("td").text()
                             )
-                        ) else w.onNext(
+                        ) else emitter.onNext(
                             QuoteNoName(
                                 content = td.text(),
                                 listOfHrefs = td.select("a").map { e ->
@@ -142,20 +142,20 @@ fun contentSource(path: String, android: Boolean) : Observable<ArticleElement> =
                         )
                     }
                 }
-                it.tagName() == "table" && it.className() == "tpl-quote" -> {
-                    it.select("tbody > tr > td")[0]?.let { td ->
-                        if (it.select("tbody > tr").size > 1) w.onNext(
+                htmlElement.tagName() == "table" && htmlElement.className() == "tpl-quote" -> {
+                    htmlElement.select("tbody > tr > td")[0]?.let { td ->
+                        if (htmlElement.select("tbody > tr").size > 1) emitter.onNext(
                             Quote(
                                 content = td.text(),
                                 listOfHrefs = td.select("p > a").map { e ->
                                     e.text() to e.attr("href").makeReference()
                                 },
-                                authorHrefs = it.select("tbody > tr")[1].select("td > a")
+                                authorHrefs = htmlElement.select("tbody > tr")[1].select("td > a")
                                     .map { e -> e.text() to e.attr("href").makeReference() },
-                                author = it.select("tbody > tr")[1].select("td").text()
+                                author = htmlElement.select("tbody > tr")[1].select("td").text()
                             )
                         )
-                        else w.onNext(
+                        else emitter.onNext(
                             QuoteNoName(
                                 content = td.text(),
                                 listOfHrefs = td.select("a").map { e ->
@@ -166,32 +166,32 @@ fun contentSource(path: String, android: Boolean) : Observable<ArticleElement> =
                 }
 
 
-                it.tagName() == "div" && it.className() == "thumb tright" -> {
+                htmlElement.tagName() == "div" && htmlElement.className() == "thumb tright" -> {
                     if (android)
 
                     // какжись я начинаю понимать почему у меня не работала ссылка
                     // listOfHrefs = it.select("span > aКНДР") wtf
 
-                    if (it.select("div.thumbinner > a > img").hasAttr("src"))
-                        if (it.select("div.thumbinner > a > img").attr("src").isNotEmpty())
-                            if ("Attention32.png" !in it.select("div > a > img").attr("src")) {
-                                if (it.select("div > a.image").size != 0) {
-                                    w.onNext(
+                    if (htmlElement.select("div.thumbinner > a > img").hasAttr("src"))
+                        if (htmlElement.select("div.thumbinner > a > img").attr("src").isNotEmpty())
+                            if ("Attention32.png" !in htmlElement.select("div > a > img").attr("src")) {
+                                if (htmlElement.select("div > a.image").size != 0) {
+                                    emitter.onNext(
                                         Img(
-                                            imgUrl = it.select("div > a > img").attr("src")
+                                            imgUrl = htmlElement.select("div > a > img").attr("src")
                                                 .makeReference(),
-                                            content = it.select("div.thumbinner > div.thumbcaption").text(),
-                                            listOfHrefs = it.select("a.mw-redirect")
+                                            content = htmlElement.select("div.thumbinner > div.thumbcaption").text(),
+                                            listOfHrefs = htmlElement.select("a.mw-redirect")
                                                 .map { a ->
                                                     a.text() to a.attr("href").makeReference()
                                                 },
                                             highResolutionImageUrl = "$url${
-                                                it.select("div > a.image").first().attr("href")
+                                                htmlElement.select("div > a.image").first().attr("href")
                                             }"
                                         )
                                     )
                                 } else {
-                                    it.select("div.embed-placeholder").attr("style")
+                                    htmlElement.select("div.embed-placeholder").attr("style")
                                         ?.let { styleString ->
                                             val styleMap = styleString.makeCssStyleMap()
                                             styleMap["background-image"]
@@ -199,16 +199,16 @@ fun contentSource(path: String, android: Boolean) : Observable<ArticleElement> =
                                                 ?.replace("(", "")
                                                 ?.replace(")", "")
                                                 ?.let { url ->
-                                                    w.onNext(
+                                                    emitter.onNext(
                                                         VideoBox(
-                                                            content = it.select("div.thumbcaption")
+                                                            content = htmlElement.select("div.thumbcaption")
                                                                 .text(),
-                                                            listOfHrefs = it.select("div.thumbcaption > a")
+                                                            listOfHrefs = htmlElement.select("div.thumbcaption > a")
                                                                 .map { e ->
                                                                     e.text() to e.attr("href")
                                                                         .makeReference()
                                                                 },
-                                                            videoUrl = it.select("div.thumbcaption > div > a")
+                                                            videoUrl = htmlElement.select("div.thumbcaption > div > a")
                                                                 .first().attr("href"),
                                                             videoImg = if (url != "//i4.ytimg.com/vi/vvM3_Eyd8qg/hqdefault.jpg") "https:$url"
                                                             else "https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcShxdWrOYqp-itf7Qv5gORVLSozxjIaj2uIz98CRQAtAKsJsTli&usqp=CAU"
@@ -221,21 +221,21 @@ fun contentSource(path: String, android: Boolean) : Observable<ArticleElement> =
                             }
                 }
 
-                it.tagName() == "h3" -> {
-                    w.onNext(
+                htmlElement.tagName() == "h3" -> {
+                    emitter.onNext(
                         H3(
-                            content = it.select("span.mw-headline").text(),
-                            id = it.select("span.mw-headline").attr("id")
+                            content = htmlElement.select("span.mw-headline").text(),
+                            id = htmlElement.select("span.mw-headline").attr("id")
                         )
                     )
 
                 }
 
-                it.tagName() == "h2" -> {
-                    w.onNext(
+                htmlElement.tagName() == "h2" -> {
+                    emitter.onNext(
                         H2(
-                            content = it.select("span.mw-headline").text(),
-                            id = it.select("span.mw-headline").attr("id")
+                            content = htmlElement.select("span.mw-headline").text(),
+                            id = htmlElement.select("span.mw-headline").attr("id")
                         )
                     )
                 }
@@ -243,7 +243,7 @@ fun contentSource(path: String, android: Boolean) : Observable<ArticleElement> =
 
             }
         }
-        w.onNext(H2(content = "Галлерея: ", id = "Галлерея"))
+        emitter.onNext(H2(content = "Галлерея: ", id = "Галлерея"))
     try {
         doc.body().select("ul.gallery")[0] // selecting box with gallery images
             .select("li.gallerybox").forEach { liWithImageBox ->
@@ -261,7 +261,7 @@ fun contentSource(path: String, android: Boolean) : Observable<ArticleElement> =
                 val listOfHrefs = liWithImageBox.select("div > div.gallerytext > p > a").map { a ->
                     a.text() to url + a.attr("href")
                 }
-                w.onNext(
+                emitter.onNext(
                     Img(
                         imgUrl = imageRef,
                         content = text,
@@ -274,7 +274,7 @@ fun contentSource(path: String, android: Boolean) : Observable<ArticleElement> =
       e.printStackTrace()
     }
 
-        w.onComplete()
+        emitter.onComplete()
     } catch (ioe: IOException) {
         ioe.printStackTrace()
     }

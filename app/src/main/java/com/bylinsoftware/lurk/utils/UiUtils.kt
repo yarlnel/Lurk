@@ -29,6 +29,18 @@ fun List<View>.makeVisible()
     }
 }
 
+fun List<View>.makeListOfViewVisibleAndClickable()
+{
+    this.makeVisible()
+    this.makeClickable()
+}
+
+fun List<View>.makeListOfViewInvisibleAndUnClickable()
+{
+    this.makeInvisible()
+    this.makeUnClickable()
+}
+
 fun List<View>.makeUnClickable()
 {
     this.forEach { view ->

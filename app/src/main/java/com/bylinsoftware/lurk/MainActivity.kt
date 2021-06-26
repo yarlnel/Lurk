@@ -6,7 +6,6 @@ import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.text.method.LinkMovementMethod
-import android.util.Log
 import android.view.View
 import android.widget.*
 import androidx.room.Room
@@ -112,18 +111,15 @@ class MainActivity : AppCompatActivity(), HasLogSystem
             new_back
         )
 
-        backList.makeInvisible()
-        backList.makeUnClickable()
+        backList.makeListOfViewInvisibleAndUnClickable()
         visibility = true
 
         fab_menu.setOnClickListener {
             visibility = if (visibility) {
-                backList.makeVisible()
-                backList.makeClickable()
+                backList.makeListOfViewVisibleAndClickable()
                 false
             } else {
-                backList.makeInvisible()
-                backList.makeUnClickable()
+                backList.makeListOfViewInvisibleAndUnClickable()
                 true
             }
         }
@@ -136,7 +132,7 @@ class MainActivity : AppCompatActivity(), HasLogSystem
             intent.type = "image/*"
             AlertDialog.Builder(this@MainActivity)
                 .setTitle("Острожно эта функция не доработана")
-                .setMessage("Осторжно это приложение в Жо... - то есть в бэте,\nпоэтому некоторые функции не работают нормально !!!")
+                .setMessage("Осторжно это приложение в бэте,\nпоэтому некоторые функции не работают нормально !!!")
                 .setPositiveButton("Да") {_, _ ->
                     Snackbar
                            .make(root_main, "ну ладно",Snackbar.LENGTH_LONG)
@@ -234,8 +230,7 @@ class MainActivity : AppCompatActivity(), HasLogSystem
 
     private fun moveToPlaceUseIdTitle (id: String)
     {
-        backList.makeInvisible()
-        backList.makeUnClickable()
+        backList.makeListOfViewInvisibleAndUnClickable()
         visibility = true
 
 
@@ -434,22 +429,22 @@ class MainActivity : AppCompatActivity(), HasLogSystem
         ll.addView(view)
     }
 
-    private fun renderArticleElement (it: ArticleElement)
+    private fun renderArticleElement (element: ArticleElement)
     {
         pb.visibility = ProgressBar.INVISIBLE
-        if (it !is Li) counter = 0
-        articleElements.add(it)
-        when (it) {
-            is VideoBox -> makeVideoBox(it)
-            is H2 -> makeH2(it)
-            is H3 -> makeH3(it)
-            is Img -> makeImg(it)
-            is P -> makeParagraph(it)
-            is QuoteTiny -> makeQuoteTiny(it)
-            is Quote -> makeQuote(it)
-            is Plashka -> makePlashka(it)
-            is Li -> makeListElement(it)
-            is QuoteNoName -> makeQuoteNoName(it)
+        if (element !is Li) counter = 0
+        articleElements.add(element)
+        when (element) {
+            is VideoBox -> makeVideoBox(element)
+            is H2 -> makeH2(element)
+            is H3 -> makeH3(element)
+            is Img -> makeImg(element)
+            is P -> makeParagraph(element)
+            is QuoteTiny -> makeQuoteTiny(element)
+            is Quote -> makeQuote(element)
+            is Plashka -> makePlashka(element)
+            is Li -> makeListElement(element)
+            is QuoteNoName -> makeQuoteNoName(element)
         }
     }
 }
