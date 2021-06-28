@@ -4,10 +4,13 @@ package com.bylinsoftware.lurk.utils
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.graphics.Color
 import android.net.Uri
 import android.text.SpannableString
 import android.text.Spanned
 import android.text.style.ClickableSpan
+import android.text.style.ForegroundColorSpan
+import android.text.style.StyleSpan
 import android.util.Log
 import android.view.View
 import android.widget.ProgressBar
@@ -95,9 +98,29 @@ fun makeSpannable(text: String, listOfHrefs: List<Pair<String, String>>, lambda:
             spannable.setSpan(object : ClickableSpan() {
                 override fun onClick(widget: View) {
                     Log.e("span", "${e.first} :: ${e.second}")
-                   lambda(e.first, e.second)
+                    lambda(e.first, e.second)
                 }
             }, indexStart, indexEnd, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+        }
+    }
+    return spannable
+}
+
+
+fun makeColorCodeText(text: String, listOfStyles: List<Pair<String, String>>) : SpannableString
+{
+    val spannable = SpannableString(text)
+    listOfStyles.forEach { e ->
+        if (e.first in text && e.first.isNotEmpty())
+        {
+            val indexStart = text.indexOf(e.first)
+            val indexEnd = indexStart + e.first.length
+            spannable.setSpan(
+                ForegroundColorSpan(Color.parseColor(e.second)),
+                indexStart,
+                indexEnd,
+                Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+            )
         }
     }
     return spannable

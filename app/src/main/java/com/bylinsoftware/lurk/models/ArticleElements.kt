@@ -99,7 +99,6 @@ class VideoBox(
 
 @Entity(tableName = "code_box")
 class CodeBox(
-    val text: String,
     val colorData: List<Pair<String, String>>,
     override val content: String
 ) : ArticleElement

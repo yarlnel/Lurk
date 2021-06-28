@@ -9,7 +9,7 @@ import org.jsoup.Jsoup
 
 fun main() {
      val colorReductionMap = mutableMapOf<String, String>()
-     val res = stylesheetSource("$url/Python")
+     val res = stylesheetSource("$url/PHP")
          .subscribe ({ e ->
              e.forEach { pair ->
                  colorReductionMap[pair.first] = pair.second
@@ -18,6 +18,8 @@ fun main() {
          },{
              it.printStackTrace()
          })
+
+    println(colorReductionMap)
     val doc = Jsoup.connect("$url/Python")
         .userAgent("Chrome/4.0.249.0 Safari/532.5")
         .get()
@@ -31,7 +33,7 @@ fun main() {
         }
     }*/
 
-   doc.body().select("#mw-content-text")[0].children().forEach {element ->
+   doc.body().select("#mw-content-text")[0].children().forEach { element ->
         when {
             element.tagName() == "div" -> {
                 element.select("div > div").let { div ->

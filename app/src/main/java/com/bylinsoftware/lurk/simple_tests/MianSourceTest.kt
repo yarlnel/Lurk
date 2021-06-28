@@ -12,7 +12,7 @@ inline fun <reified T> findByType()
     listOfElement.filterIsInstance<T>().forEach { element -> println(getGsonBuilder().toJson(element)) }
 }
 fun main() {
-    val res = contentSource("$url/Zalgo", false)
+    val res = contentSource("$url/Python", false)
         .subscribe({ element ->
             listOfElement.add(element)
             println(getGsonBuilder().toJson(element))

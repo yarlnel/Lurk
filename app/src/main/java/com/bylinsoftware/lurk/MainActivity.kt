@@ -429,6 +429,17 @@ class MainActivity : AppCompatActivity(), HasLogSystem
         ll.addView(view)
     }
 
+    private fun makeCodeBox (codeBox: CodeBox)
+    {
+        val view = layoutInflater.inflate(R.layout.no_name_quote, ll, false)
+        val tv = view.findViewById<TextView>(R.id.tv_content)
+
+        tv.text = makeColorCodeText(codeBox.content, codeBox.colorData)
+
+        tv.movementMethod = LinkMovementMethod.getInstance()
+        ll.addView(view)
+    }
+
     private fun renderArticleElement (element: ArticleElement)
     {
         pb.visibility = ProgressBar.INVISIBLE
@@ -445,6 +456,7 @@ class MainActivity : AppCompatActivity(), HasLogSystem
             is Plashka -> makePlashka(element)
             is Li -> makeListElement(element)
             is QuoteNoName -> makeQuoteNoName(element)
+            is CodeBox -> makeCodeBox(element)
         }
     }
 }

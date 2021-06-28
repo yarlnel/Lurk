@@ -10,6 +10,7 @@ import com.bylinsoftware.lurk.utils.makeReference
 import io.reactivex.Observable
 import io.reactivex.Single
 import org.jsoup.Jsoup
+import org.jsoup.nodes.Document
 import java.io.IOException
 
 const val url = "https://lurkmore.to"
@@ -38,30 +39,35 @@ fun highResolutionImageSource(url: String): Single<String> = Single.create<Strin
     }
 }
 
-fun stylesheetSource (path: String) : Single<List<Pair<String, String>>> = Single.create{ singleEmitter ->
-    val doc = Jsoup.connect(path)
-        .userAgent("Chrome/4.0.249.0 Safari/532.5")
-        .get()
+fun getStylesheetListWithDocument(doc: Document) : List<Pair<String, String>>
+{
     val styleList = mutableListOf<Pair<String, String>>()
     doc.head().select("style").let {
         it.toString().split("\n")
             .filter {line -> "color" in line}
-            .filter {line -> ".python.source-python" in line }.forEach { line ->
-            line.split(" ").let { word ->
-                println(getGsonBuilder().toJson(word))
-               if (word.size > 1)
-                    if (word[1].length == 4 && word[1].contains("."))
-                        when {
-                            word[3].length == 9 -> styleList.add(word[1].replace(".", "") to word[3].clearAllSymbols("; }"))
-                            "black" in word[3] -> styleList.add(word[1].replace(".", "") to "#2e2e2e")
-                            "red" in word[3] -> styleList.add(word[1].replace(".", "") to "#df7474")
-                            "green" in word[3] -> styleList.add(word[1].replace(".", "") to "#8bc34a")
-                        }
+            .filter {line -> ".source" in line }.forEach { line ->
+                line.split(" ").let { word ->
+                    println(getGsonBuilder().toJson(word))
+                    if (word.size > 1)
+                        if (word[1].length == 4 && word[1].contains("."))
+                            when {
+                                word[3].length == 9 -> styleList.add(word[1].replace(".", "") to word[3].clearAllSymbols("; }"))
+                                "black" in word[3] -> styleList.add(word[1].replace(".", "") to "#2e2e2e")
+                                "red" in word[3] -> styleList.add(word[1].replace(".", "") to "#df7474")
+                                "green" in word[3] -> styleList.add(word[1].replace(".", "") to "#8bc34a")
+                            }
 
+                }
             }
-        }
     }
-    singleEmitter.onSuccess(styleList)
+    return styleList
+}
+
+fun stylesheetSource (path: String) : Single<List<Pair<String, String>>> = Single.create{ singleEmitter ->
+    val doc = Jsoup.connect(path)
+        .userAgent("Chrome/4.0.249.0 Safari/532.5")
+        .get()
+    singleEmitter.onSuccess(getStylesheetListWithDocument(doc = doc))
 }
 
 /*
@@ -73,10 +79,14 @@ when {
                         }
  */
 fun contentSource(path: String, android: Boolean) : Observable<ArticleElement> = Observable.create { emitter ->
+
     try {
         val doc = Jsoup.connect(path)
             .userAgent("Chrome/4.0.249.0 Safari/532.5")
             .get()
+
+        val colorReductionMap = getStylesheetListWithDocument(doc = doc).toMap()
+
         // to select all elements
         //val elements = doc.body().select("#mw-content-text")[0].allElements
 
@@ -101,6 +111,21 @@ fun contentSource(path: String, android: Boolean) : Observable<ArticleElement> =
                             listOfHrefs = listOfHrefs
                         )
                     )
+                }
+
+                htmlElement.tagName() == "div" && htmlElement.select("div").hasClass("mw-geshi") -> {
+                    htmlElement.select("div > div > pre")[0].let { codeBlock ->
+                        val charToColorList = mutableListOf<Pair<String, String>>()
+                        codeBlock.select("span").forEach { span ->
+                            charToColorList += span.text() to (colorReductionMap[span.className()] ?: "#009688")
+                        }
+                        emitter.onNext(
+                            CodeBox(
+                                colorData = charToColorList,
+                                content = codeBlock.text()
+                            )
+                        )
+                    }
                 }
 
                 htmlElement.tagName() == "ul" -> {
@@ -245,8 +270,9 @@ fun contentSource(path: String, android: Boolean) : Observable<ArticleElement> =
         }
         emitter.onNext(H2(content = "Галлерея: ", id = "Галлерея"))
     try {
-        doc.body().select("ul.gallery")[0] // selecting box with gallery images
-            .select("li.gallerybox").forEach { liWithImageBox ->
+        // selecting box with gallery images
+        doc.body().select("ul.gallery").first()
+            ?.select("li.gallerybox")?.forEach { liWithImageBox ->
                 var text = ""
                 var refWithHighResolutionImage = url
                 liWithImageBox.select("div > div.gallerytext")[0].text()?.let { imageText ->
