@@ -12,18 +12,19 @@ import com.bylinsoftware.lurk.db.MainDatabase
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.activity_history.*
 import kotlinx.android.synthetic.main.activity_toc.list_la
+import javax.inject.Inject
 
 class HistoryActivity : AppCompatActivity()
 {
-private lateinit var db : MainDatabase
+@Inject lateinit var db : MainDatabase
 private lateinit var historyDao : HistoryDao
 
     override fun onCreate(savedInstanceState: Bundle?)
     {
+        appComponent . inject(this)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_history)
-        db = Room.databaseBuilder(applicationContext, MainDatabase::class.java, "database")
-            .allowMainThreadQueries().build()
+
         historyDao = db.historyDao()
         fab_delete.setOnClickListener {
             AlertDialog.Builder(this@HistoryActivity)

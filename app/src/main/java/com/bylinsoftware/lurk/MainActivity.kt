@@ -22,6 +22,8 @@ import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_main.*
 import com.google.android.material.snackbar.Snackbar
+import com.squareup.picasso.RequestCreator
+import javax.inject.Inject
 
 class MainActivity : AppCompatActivity(), HasLogSystem
 {
@@ -41,25 +43,27 @@ class MainActivity : AppCompatActivity(), HasLogSystem
     override val logActive = false
     var visibility = false
 
+    @Inject lateinit var db : MainDatabase
+    @Inject lateinit var picasso: RequestCreator
+
     override fun onCreate(savedInstanceState: Bundle?)
     {
+        appComponent . inject(this)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        Picasso.with(this@MainActivity).load(R.drawable.goodfon).centerCrop().fit().into(background_iv)
+        picasso.into(background_iv)
         pb.visibility = ProgressBar.VISIBLE
 
+        /*
         // initial Logger system
         val logger = Logger(
             tag = MainActivity::class.java.simpleName,
             from = MainActivity::class.java.simpleName
-        )
+        )*/
 
 
 
-        // Get DB
-        val db = Room.databaseBuilder(applicationContext, MainDatabase::class.java, "database")
-            .fallbackToDestructiveMigration() // if we go too migration that's function clear all data for new struct
-            .allowMainThreadQueries().build()
+
 
 
         val historyDao = db.historyDao()
@@ -94,7 +98,7 @@ class MainActivity : AppCompatActivity(), HasLogSystem
                         y = scroll_view.scrollY
                     )
                 )
-            },logger::log)
+            },{})
         disposeBag.add(result)
 
 
